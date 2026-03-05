@@ -41,5 +41,89 @@
  *   // => { name: "Priya", totalMarks: 63, percentage: 31.5, grade: "F", ... }
  */
 export function generateReportCard(student) {
-  // Your code here
+    if (
+        student === null ||
+        typeof student !== "object" ||
+        Array.isArray(student) ||
+        Object.keys(student).length === 0
+    )
+        return null;
+
+    let { name, marks } = student;
+    if (typeof name !== "string" || name.trim() === "") return null;
+
+    if (typeof marks !== "object" || Array.isArray(marks) || Object.values(marks).length === 0)
+        return null;
+
+    let marksArr = Object.values(marks);
+    // console.log(marksArr)
+
+    for (let key in marks) {
+        if (marks[key] < 0 || marks[key] > 100) {
+            return null;
+        }
+    }
+
+    let totalMarks = marksArr.reduce((acc, mark) => acc + mark, 0);
+
+    let subjectCount = Object.keys(marks).length;
+
+    let percentage = (totalMarks / (subjectCount * 100)) * 100;
+    percentage = parseFloat(percentage.toFixed(2));
+
+    let grade = "";
+
+    switch (true) {
+        case percentage >= 90:
+            grade = "A+";
+            break;
+        case percentage >= 80:
+            grade = "A";
+            break;
+        case percentage >= 70:
+            grade = "B";
+            break;
+        case percentage >= 60:
+            grade = "C";
+            break;
+        case percentage >= 40:
+            grade = "D";
+            break;
+        case percentage < 40:
+            grade = "F";
+            break;
+    }
+
+    for (let key in marks) {
+        if (typeof marks[key] !== "number" || isNaN(marks[key])) {
+            return null;
+        }
+    }
+    let highestSubject = Object.keys(marks).reduce((acc, currVal) =>
+        marks[acc] > marks[currVal] ? acc : currVal,
+    );
+
+    let lowestSubject = Object.keys(marks).reduce((acc, currVal) =>
+        marks[acc] < marks[currVal] ? acc : currVal,
+    );
+
+    let passedSubjects = Object.entries(marks)
+        .filter(([sub, val]) => val >= 40)
+        .map(([sub, val]) => sub);
+
+    let failedSubjects = Object.entries(marks)
+        .filter(([sub, val]) => val < 40)
+        .map(([sub, val]) => sub);
+
+    return {
+        name,
+        totalMarks,
+        percentage,
+        grade,
+        highestSubject,
+        lowestSubject,
+        passedSubjects,
+        failedSubjects,
+        subjectCount,
+    };
 }

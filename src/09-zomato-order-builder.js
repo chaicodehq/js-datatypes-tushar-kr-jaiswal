@@ -45,6 +45,67 @@
  *   // subtotal: 1000, deliveryFee: 0, gst: 50, discount: min(500, 150) = 150
  *   // grandTotal: 1000 + 0 + 50 - 150 = 900
  */
+
 export function buildZomatoOrder(cart, coupon) {
-  // Your code here
+    if (cart === null || typeof cart !== "object" || !Array.isArray(cart) || cart.length === 0)
+        return null;
+
+    let validItems = cart.filter((obj) => obj.qty > 0);
+    console.log(validItems);
+
+    const items = validItems.map((item) => {
+        const addonTotal = Array.isArray(item.addons)
+            ? item.addons.reduce((acc, str) => {
+                  const price = parseFloat(str.split(":")[1]);
+                  return acc + price;
+              }, 0)
+            : 0;
+
+        const itemTotal = (item.price + addonTotal) * item.qty;
+
+        return {
+            name: item.name,
+            qty: item.qty,
+            basePrice: item.price,
+            addonTotal,
+            itemTotal,
+        };
+    });
+
+    const subtotal = items.reduce((sum, obj) => sum + obj.itemTotal, 0);
+
+    let deliveryFee = 0;
+
+    if (subtotal < 500) deliveryFee = 30;
+    if (subtotal > 499 && subtotal < 1000) deliveryFee = 15;
+    if (subtotal > 1000) deliveryFee = 0;
+
+    let gst = parseFloat((subtotal * 0.05).toFixed(2));
+    let discount = 0;
+
+    if (!coupon || typeof coupon !== "string") {
+        discount = 0;
+    } else if (coupon.trim().toUpperCase() === "FIRST50") {
+        discount = Math.min(subtotal * 0.5, 150);
+    } else if (coupon.toUpperCase() === "FLAT100") {
+        discount = 100;
+    } else if (coupon.toUpperCase() === "FREESHIP") {
+        discount = deliveryFee;
+        deliveryFee = 0;
+    }
+
+    let grandTotal = subtotal + deliveryFee + gst - discount;
+    grandTotal = Math.round((grandTotal + Number.EPSILON) * 100) / 100;
+    grandTotal < 1 ? (grandTotal = 0) : grandTotal;
+
+    return {
+        items,
+        subtotal,
+        deliveryFee,
+        gst,
+        discount,
+        grandTotal,
+    };
 }
+
+// buildZomatoOrder([{ name: "Biryani", price: 50, qty: 1, addons: ["Raita:30"] }], "FREESHIP");

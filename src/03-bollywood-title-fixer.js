@@ -30,5 +30,27 @@
  *   // => "Dil ka Kya Kare"
  */
 export function fixBollywoodTitle(title) {
-  // Your code here
+    if (typeof title !== "string" || title.trim() === "") return "";
+
+    let defaultText = ["ka", "ki", "ke", "se", "aur", "ya", "the", "of", "in", "a", "an"];
+    let noExtraSpaceText = title
+        .trim()
+        .replace(/\s{2,}/g, " ")
+        .split(" ");
+
+    let allLowerCaseText = noExtraSpaceText.map((word, index) => {
+        const lower = word.toLowerCase();
+        // console.log(lower);
+
+        if (index === 0) {
+            return lower.charAt(0).toUpperCase() + lower.slice(1);
+        }
+
+        if (defaultText.includes(lower)) return lower;
+
+        return lower.charAt(0).toUpperCase() + lower.slice(1);
+    });
+    // console.log(allLowerCaseText.join(" "));
+    return allLowerCaseText.join(" ");
 }
+fixBollywoodTitle("  DILWALE   DULHANIA   aur   JAYENGE  ");

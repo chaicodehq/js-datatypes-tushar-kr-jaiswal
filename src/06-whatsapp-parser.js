@@ -39,5 +39,47 @@
  *   //      text: "I love this song", wordCount: 4, sentiment: "love" }
  */
 export function parseWhatsAppMessage(message) {
-  // Your code here
+    if (typeof message !== "string" || message.trim() === "") return null;
+    if (!message.includes(" - ") || !message.includes(": ")) return null;
+
+    // declaration
+    const wordList = message.split(" ");
+    let [date, time, hyphon, sender, ...text] = wordList;
+    let indexOfHyphon = message.indexOf(hyphon);
+    let indexOfColonAfterHyphon = message.indexOf(": ", indexOfHyphon + 3);
+
+    // updation
+    sender = message.substring(indexOfHyphon + 1, indexOfColonAfterHyphon).trim();
+    text = message.slice(indexOfColonAfterHyphon + 1).trim();
+    date = date.slice(0, -1);
+
+    // declaration
+    let wordCount = text.split(" ").length;
+    let sentiment = "neutral";
+    let filterSentiment = text.split(" ");
+    let funnySentiment = filterSentiment.filter(
+        (word) =>
+            word === "😂" ||
+            String(word).toLowerCase() === "haha" ||
+            String(word).toLowerCase() === ":)",
+    );
+    let loveSentiment = filterSentiment.filter(
+        (word) =>
+            word === "❤" ||
+            String(word).toLowerCase() === "love" ||
+            String(word).toLowerCase() === "pyaar",
+    );
+
+    // conditional checking
+    if (funnySentiment.length && loveSentiment.length) {
+        sentiment = "funny";
+    } else if (loveSentiment.length) {
+        sentiment = "love";
+    } else if (funnySentiment.length) {
+        sentiment = "funny";
+    } else {
+        sentiment = "neutral";
+    }
+
+    return { date, time, sender, text, wordCount, sentiment };
 }
